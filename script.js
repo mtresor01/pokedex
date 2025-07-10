@@ -1,29 +1,27 @@
 const cardsContainer = document.querySelector('.cards');
-const nameContainer = document.getElementById('pokemonName');
-const numberContainer = document.getElementById('pokemonNumber');
-const imageContainer = document.getElementById('pokemonImage');
-const descriptionContainer = document.getElementById('pokemonDescription');
-const typeContainer = document.getElementById('pokemonType');
-const statsContainer = document.getElementById('pokemonStatistc');
 const searchInput = document.getElementById('searchInput');
-
+const loadMoreButton = document.getElementById('loadMoreButton');
 let allLoadedPokemons = [];
-let currentIndex = 0;
+let offset = 0;
+const limit = 20;
 
 async function loadPokemons() {
-    showLoadingSpinner();
-    const pokemonResponses = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20&offset=0');
-    const data = await pokemonResponses.json();
-    for (const loadedPokemon of data.results) {
-        const pokemon = await fetchPokemonDetails(loadedPokemon.url);
-        allLoadedPokemons.push(pokemon);
-    }
-    renderCards(allLoadedPokemons);
+  showLoadingSpinner();
+  const pokemonResponses = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
+  const data = await pokemonResponses.json();
+  for (const loadedPokemon of data.results) {
+    const pokemon = await fetchPokemonDetails(loadedPokemon.url);
+    allLoadedPokemons.push(pokemon);
+    const card = createPokemonCard(pokemon);
+    cardsContainer.appendChild(card);
+  }
+  if (offset === 0) {
     const saved = localStorage.getItem('selectedPokemon');
     const defaultPokemon = saved ? JSON.parse(saved) : allLoadedPokemons[0];
-    currentIndex = allLoadedPokemons.findIndex(loadedpokemon => loadedpokemon.id === defaultPokemon.id);
-    renderPokemonInVisualizer(defaultPokemon);
-    toggleModal();
+    renderPokemonInModal(defaultPokemon);
+  }
+  offset += limit;
+  document.getElementById('loadingSpinner').classList.add('hidden');
 }
 
 function toggleModal(){
@@ -48,7 +46,6 @@ async function fetchPokemonDetails(url) {
   const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonData.id}`);
   const species = await speciesResponse.json();
   const englishEntry  = species.flavor_text_entries.find(entry => entry.language.name === 'en');
-
   return {
     id: pokemonData.id,
     name: pokemonData.name,
@@ -71,34 +68,22 @@ function renderCards(pokemonList) {
 
 function createPokemonCard(pokemon) {
   const card = document.createElement('div');
-  card.className = 'card';
+  const mainType = pokemon.types[0];
+  card.className = `card type-${mainType}`;
   card.innerHTML = createCardHTML(pokemon);
   card.addEventListener('click', () => {
     currentIndex = allLoadedPokemons.findIndex(loadedPokemon => loadedPokemon.id === pokemon.id);
-    renderPokemonInVisualizer(pokemon);
     renderPokemonInModal(pokemon);     
     document.getElementById('pokemonModal').classList.remove('hidden');
   });
   return card;
 }
-
-
 searchInput.addEventListener('input', event => {
-  const query = evente.target.value.toLowerCase();
+  const query = event.target.value.toLowerCase();
   const filtered = allLoadedPokemons.filter(pokemon =>
     pokemon.name.toLowerCase().startsWith(query)
   );
   renderCards(filtered);
-});
-
-document.getElementById('prevPokemon').addEventListener('click', () => {
-  currentIndex = (currentIndex - 1 + allLoadedPokemons.length) % allLoadedPokemons.length;
-  renderPokemonInVisualizer(allLoadedPokemons[currentIndex]);
-});
-
-document.getElementById('nextPokemon').addEventListener('click', () => {
-  currentIndex = (currentIndex + 1) % allLoadedPokemons.length;
-  renderPokemonInVisualizer(allLoadedPokemons[currentIndex]);
 });
 
 function capitalize(str) {
@@ -109,18 +94,24 @@ document.querySelector('.closeModal').addEventListener('click', () => {
   document.getElementById('pokemonModal').classList.add('hidden');
 });
 
+document.getElementById('pokemonModal').addEventListener('click', (e) => {
+  const modalContent = document.querySelector('.modalContent');
+  if (!modalContent.contains(e.target)) {
+    document.getElementById('pokemonModal').classList.add('hidden');
+  }
+});
+
 document.getElementById('modalPrevPokemon').addEventListener('click', () => {
   currentIndex = (currentIndex - 1 + allLoadedPokemons.length) % allLoadedPokemons.length;
   const pokemon = allLoadedPokemons[currentIndex];
-  renderPokemonInVisualizer(pokemon);
   renderPokemonInModal(pokemon);
 });
 
 document.getElementById('modalNextPokemon').addEventListener('click', () => {
   currentIndex = (currentIndex + 1) % allLoadedPokemons.length;
   const pokemon = allLoadedPokemons[currentIndex];
-  renderPokemonInVisualizer(pokemon);
   renderPokemonInModal(pokemon);
 });
 
+loadMoreButton.addEventListener('click', loadPokemons);
 loadPokemons();

@@ -1,7 +1,8 @@
 function createCardHTML(pokemon) {
+  const mainType = pokemon.types[0]; 
   return `
     <h5 class="cardTitle">${capitalize(pokemon.name)}</h5>
-    <div class="cardBody">
+    <div class="cardBody type-${mainType}">
       <img src="${pokemon.img}" class="cardImg" alt="${pokemon.name}">
       <span>${pokemon.number}</span>
     </div>
@@ -9,22 +10,6 @@ function createCardHTML(pokemon) {
       ${pokemon.types.map(pokemonType => `<span class="spanCardFooter type-${pokemonType}">${pokemonType}</span>`).join('')}
     </div>
   `;
-}
-
-function renderPokemonInVisualizer(pokemon) {
-  if (!pokemon) return;
-  nameContainer.textContent = capitalize(pokemon.name);
-  numberContainer.textContent = pokemon.number;
-  imageContainer.innerHTML = `<img src="${pokemon.img}" alt="${pokemon.name}" style="width: 150px;">`;
-  descriptionContainer.textContent = pokemon.description;
-  typeContainer.innerHTML = pokemon.types.map(pokemonType =>
-    `<span class="spanCardFooter type-${pokemonType}">${pokemonType}</span>`).join('');
-  statsContainer.innerHTML = `
-    <p><strong>Weight:</strong> ${pokemon.weight}</p>
-    ${pokemon.stats.map(stat => `
-      <p><strong>${capitalize(stat.stat.name)}:</strong> ${stat.base_stat}</p>`).join('')}
-  `;
-  localStorage.setItem('selectedPokemon', JSON.stringify(pokemon));
 }
 
 function renderPokemonInModal(pokemon) {
