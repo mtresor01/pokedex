@@ -17,12 +17,17 @@
                 <img src="img/pokemon-ball.png" alt="pokemon-ball">
                 <h1 class="gameName">POKEDEX</h1>
             </div>
-                <input type="text" name="search" id="searchInput" placeholder="search...">
+            <div class="searchContainer">
+                <input type="text" name="search" id="searchInput" placeholder="Enter at least 3 letters">
+                <button id="searchButton" class="searchButton" disabled>
+                    <img src="img/search-icon.png" alt="search icon">
+                </button>
+            </div>
         </header>
         
         <main>
             <div class="cards"></div>
-            <button id="loadMoreButton" class="load-more-btn">Load more</button>
+            <button id="loadMoreButton" class="loadMoreButton">Load more</button>
         </main>
         
         <footer>

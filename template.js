@@ -1,5 +1,5 @@
 function createCardHTML(pokemon) {
-  const mainType = pokemon.types[0]; 
+  const mainType = pokemon.types[0];
   return `
     <h5 class="cardTitle">${capitalize(pokemon.name)}</h5>
     <div class="cardBody type-${mainType}">
